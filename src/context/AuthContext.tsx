@@ -83,15 +83,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return u;
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : '';
-        // If wrong credentials — don't fallback, surface the error
         if (msg === 'Invalid email or password') return null;
-        // Network error — fallback to localStorage
-        console.warn('API unreachable — using localStorage');
-        setUsingApi(false);
+        // Network error — surface it instead of silently falling back
+        throw new Error('Cannot connect to the server. Please check your internet connection.');
       }
     }
-
-    // localStorage fallback
+    // localStorage mode (only when VITE_USE_API=false)
     const users = getLocalUsers();
     const found = users.find(
       u => u.email.toLowerCase() === email.toLowerCase() && u.password === password
@@ -102,7 +99,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return found;
     }
     return null;
-  };
 
   // ── REGISTER ─────────────────────────────────────────────────────────────
   const register = async (data: Omit<User, 'id' | 'createdAt'>): Promise<User> => {
