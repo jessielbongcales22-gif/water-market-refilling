@@ -68,7 +68,9 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
     try {
       const user = await login(loginEmail, loginPassword);
       if (user) { onLogin(); } else { setError('Invalid email or password.'); }
-    } catch { setError('Invalid email or password.'); }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Login failed. Please try again.');
+    }
     setLoading(false);
   };
 
